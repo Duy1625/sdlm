@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(100)
+  username  String?  @unique @db.VarChar(50)
+  password  String?  @db.VarChar(255)  // Nullable for OAuth users
+  name      String?  @db.VarChar(100)
+  phone     String?  @db.VarChar(20)
+  avatar    String?  @db.VarChar(500)
+
+  // OAuth fields
+  provider     String?  @db.VarChar(50)   // google, facebook, credentials
+  providerId   String?  @db.VarChar(255)
+
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  listings         Listing[]
+  sentMessages     Message[]       @relation("SentMessages")
+  buyerConversations  Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+  pageViews        PageView[]
+
+  @@unique([provider, providerId])
+  @@index([role])
+  @@index([email])
+  @@map("users")
+}
+
+model Category {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(100)
+  slug        String      @unique @db.VarChar(100)
+  description String?     @db.Text
+  icon        String?     @db.VarChar(100)  // Icon name or emoji
+  parentId    Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  parent      Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[]  @relation("CategoryHierarchy")
+  listings    Listing[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@map("categories")
+}
+
+model Listing {
+  id          Int            @id @default(autoincrement())
+  title       String         @db.VarChar(255)
+  slug        String         @unique @db.VarChar(255)
+  description String         @db.Text
+  price       Decimal        @db.Decimal(12, 2)  // Giá sản phẩm/dịch vụ
+
+  // Category and Location
+  categoryId  Int
+  location    String?        @db.VarChar(255)  // Địa chỉ, khu vực
+
+  // Contact Info
+  contactName  String        @db.VarChar(100)
+  contactPhone String        @db.VarChar(20)
+
+  // User Info (nullable for guest posts)
+  userId      Int?
+  guestEmail  String?       @db.VarChar(100)  // For guest posts
+
+  // Status and verification
+  status      ListingStatus @default(ACTIVE)
+  isVerified  Boolean       @default(false)   // Admin can verify
+
+  // Timestamps
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  expiresAt   DateTime?                       // Optional expiration date
+
+  // Relations
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  images      Image[]
+  conversations Conversation[]
+
+  @@index([categoryId])
+  @@index([userId])
+  @@index([status])
+  @@index([price])
+  @@index([createdAt])
+  @@index([location])
+  @@map("listings")
+}
+
+model Image {
+  id          Int      @id @default(autoincrement())
+  listingId   Int
+  url         String   @db.VarChar(500)
+  isPrimary   Boolean  @default(false)  // Main image for listing card
+  createdAt   DateTime @default(now())
+
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@index([isPrimary])
+  @@map("images")
+}
+
+model Conversation {
+  id          Int      @id @default(autoincrement())
+  listingId   Int?     // Nullable for support conversations with admin
+  buyerId     Int      // User interested in buying
+  sellerId    Int      // Listing owner
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  listing     Listing?  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer       User     @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller      User     @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages    Message[]
+
+  @@unique([listingId, buyerId])  // One conversation per listing per buyer
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([listingId])
+  @@map("conversations")
+}
+
+model Message {
+  id              Int          @id @default(autoincrement())
+  conversationId  Int
+  senderId        Int
+  content         String       @db.Text
+  mediaUrl        String?      @db.VarChar(500)  // URL for image/video
+  mediaType       String?      @db.VarChar(20)   // 'image' or 'video'
+  isRead          Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender          User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model PageView {
+  id          Int      @id @default(autoincrement())
+  path        String   @db.VarChar(500)
+  ipAddress   String?  @db.VarChar(50)
+  userAgent   String?  @db.VarChar(500)
+  userId      Int?     // Track logged in users
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([path])
+  @@map("page_views")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ListingStatus {
+  ACTIVE    // Đang hoạt động
+  SOLD      // Đã bán
+  EXPIRED   // Hết hạn
+  HIDDEN    // Ẩn bởi user hoặc admin
+}

@@ -1,0 +1,50 @@
+{
+  "name": "sadeclocalmarket",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "dotenv -e .env.local -- prisma db push",
+    "db:seed": "dotenv -e .env.local -- npx tsx prisma/seed-admin.ts",
+    "db:seed-categories": "dotenv -e .env.local -- npx tsx prisma/seed-categories.ts",
+    "db:studio": "dotenv -e .env.local -- prisma studio",
+    "admin:create": "dotenv -e .env.local -- node scripts/create-admin-user.js",
+    "admin:set": "dotenv -e .env.local -- node scripts/set-user-as-admin.js",
+    "admin:check": "dotenv -e .env.local -- node scripts/check-admin.js"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@prisma/client": "^5.22.0",
+    "@uiw/react-md-editor": "^4.0.4",
+    "autoprefixer": "^10.4.21",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.8.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
+    "next": "^15.0.0",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.53.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.0.0",
+    "postcss": "^8.4.47",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4.20.6",
+    "typescript": "^5.6.3"
+  }
+}
