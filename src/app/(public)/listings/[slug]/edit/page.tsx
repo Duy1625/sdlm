@@ -6,12 +6,13 @@ import ListingForm from '@/components/listings/ListingForm'
 import Link from 'next/link'
 
 interface EditListingPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default async function EditListingPage({ params }: EditListingPageProps) {
+  const { slug } = await params
   const session = await getServerSession(authOptions)
 
   // Must be logged in
@@ -21,7 +22,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
 
   // Fetch the listing
   const listing = await db.listing.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       category: true,
       images: true,

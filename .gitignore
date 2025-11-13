@@ -38,3 +38,5 @@ next-env.d.ts
 # uploaded files (keep folder structure but ignore uploaded files)
 /public/uploads/**/*
 !/public/uploads/**/.gitkeep
+
+.vercel
