@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import ChatWithAdminButton from '@/components/messages/ChatWithAdminButton'
 
 export default async function MessagesPage() {
   const session = await getServerSession(authOptions)
@@ -13,6 +14,7 @@ export default async function MessagesPage() {
 
   const conversations = await getUserConversations()
   const userId = parseInt(session.user.id)
+  const isAdmin = session.user.role === 'ADMIN'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-12">
@@ -27,14 +29,19 @@ export default async function MessagesPage() {
             <span className="text-gray-800">Tin nhắn</span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Tin nhắn của bạn
-            </span>
-          </h1>
-          <p className="text-gray-600">
-            Quản lý tất cả các cuộc trò chuyện với người mua và người bán
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                <span className="bg-gradient-primary bg-clip-text text-transparent">
+                  Tin nhắn của bạn
+                </span>
+              </h1>
+              <p className="text-gray-600">
+                Quản lý tất cả các cuộc trò chuyện với người mua và người bán
+              </p>
+            </div>
+            {!isAdmin && <ChatWithAdminButton />}
+          </div>
         </div>
 
         {/* Conversations List */}
@@ -63,7 +70,8 @@ export default async function MessagesPage() {
               const otherUser = conversation.buyerId === userId ? conversation.seller : conversation.buyer
               const lastMessage = conversation.messages[0]
               const unreadCount = conversation._count.messages
-              const primaryImage = conversation.listing.images[0]
+              const isAdminChat = !conversation.listing
+              const primaryImage = conversation.listing?.images?.[0]
 
               return (
                 <Link
@@ -72,12 +80,18 @@ export default async function MessagesPage() {
                   className="block bg-white rounded-2xl border border-gray-200 p-6 hover:border-emerald-500 hover:shadow-lg transition-all"
                 >
                   <div className="flex gap-4">
-                    {/* Listing Image */}
+                    {/* Avatar/Image */}
                     <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                      {primaryImage ? (
+                      {isAdminChat ? (
+                        <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white">
+                          <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      ) : primaryImage ? (
                         <img
                           src={primaryImage.url}
-                          alt={conversation.listing.title}
+                          alt={conversation.listing?.title || 'Listing'}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -93,11 +107,19 @@ export default async function MessagesPage() {
                     <div className="flex-1 min-w-0">
                       {/* Other User */}
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                          {otherUser.name?.charAt(0).toUpperCase() || '?'}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${
+                          isAdminChat ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gradient-primary'
+                        }`}>
+                          {isAdminChat ? (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            otherUser.name?.charAt(0).toUpperCase() || '?'
+                          )}
                         </div>
                         <span className="font-semibold text-gray-800">
-                          {otherUser.name || 'Người dùng'}
+                          {isAdminChat ? 'Admin' : (otherUser.name || 'Người dùng')}
                         </span>
                         {unreadCount > 0 && (
                           <span className="px-2 py-0.5 bg-emerald-500 text-white text-xs font-semibold rounded-full">
@@ -106,10 +128,12 @@ export default async function MessagesPage() {
                         )}
                       </div>
 
-                      {/* Listing Title */}
-                      <p className="text-sm text-gray-600 mb-1 truncate">
-                        {conversation.listing.title}
-                      </p>
+                      {/* Listing Title - only show for non-admin chats */}
+                      {!isAdminChat && conversation.listing && (
+                        <p className="text-sm text-gray-600 mb-1 truncate">
+                          {conversation.listing.title}
+                        </p>
+                      )}
 
                       {/* Last Message */}
                       {lastMessage && (
