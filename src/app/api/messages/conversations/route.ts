@@ -116,19 +116,15 @@ export async function GET() {
     // If current user is admin, don't show "Chat với Admin" (conversations with themselves)
     let finalConversations = formattedConversations
     if (isCurrentUserAdmin) {
-      // Admin should not see:
-      // 1. Conversations where they chat with themselves (isAdminChat)
-      // 2. Admin support conversations (conversations without listing where admin is seller)
+      // Admin should see ALL conversations including support chats
+      // Only filter out conversations where they're chatting with themselves
       finalConversations = formattedConversations.filter(c => {
-        // Filter out conversations with admin themselves
-        if (c.isAdminChat) return false
-
-        // Filter out admin support conversations (no listing, admin is seller/recipient)
-        if (!c.listingId) return false
-
+        // Don't filter out admin support conversations - admin needs to see them!
+        // Only filter out if the other user is ALSO admin (chatting with themselves)
+        if (c.isAdminChat && c.otherUser.id === userId) return false
         return true
       })
-      console.log(`🔐 Admin user - filtered out ${formattedConversations.length - finalConversations.length} admin-related conversations`)
+      console.log(`🔐 Admin user - showing ${finalConversations.length} conversations (${formattedConversations.length - finalConversations.length} filtered out)`)
     } else {
       // For regular users, merge all admin conversations into one
       const adminConversations = formattedConversations.filter(c => c.isAdminChat)
