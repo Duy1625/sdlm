@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import ChatWithAdminButton from '@/components/messages/ChatWithAdminButton'
 
 export default async function MessagesPage() {
   const session = await getServerSession(authOptions)
@@ -14,7 +13,6 @@ export default async function MessagesPage() {
 
   const conversations = await getUserConversations()
   const userId = parseInt(session.user.id)
-  const isAdmin = session.user.role === 'ADMIN'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-12">
@@ -29,19 +27,14 @@ export default async function MessagesPage() {
             <span className="text-gray-800">Tin nhắn</span>
           </div>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  Tin nhắn của bạn
-                </span>
-              </h1>
-              <p className="text-gray-600">
-                Quản lý tất cả các cuộc trò chuyện với người mua và người bán
-              </p>
-            </div>
-            {!isAdmin && <ChatWithAdminButton />}
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <span className="bg-gradient-primary bg-clip-text text-transparent">
+              Tin nhắn của bạn
+            </span>
+          </h1>
+          <p className="text-gray-600">
+            Quản lý tất cả các cuộc trò chuyện với người mua và người bán
+          </p>
         </div>
 
         {/* Conversations List */}
