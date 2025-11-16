@@ -41,6 +41,8 @@ export default function ChatBox({ onClose, initialConversationId }: ChatBoxProps
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchedUsers, setSearchedUsers] = useState<any[]>([])
+  const [searchingUsers, setSearchingUsers] = useState(false)
 
   useEffect(() => {
     fetchConversations()
@@ -77,6 +79,31 @@ export default function ChatBox({ onClose, initialConversationId }: ChatBoxProps
     }
   }
 
+  // Search for users
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!searchQuery || searchQuery.trim().length < 2) {
+        setSearchedUsers([])
+        return
+      }
+
+      try {
+        setSearchingUsers(true)
+        const response = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`)
+        const data = await response.json()
+        setSearchedUsers(data.users || [])
+      } catch (error) {
+        console.error('Failed to search users:', error)
+        setSearchedUsers([])
+      } finally {
+        setSearchingUsers(false)
+      }
+    }
+
+    const debounceTimer = setTimeout(searchUsers, 300)
+    return () => clearTimeout(debounceTimer)
+  }, [searchQuery])
+
   const filteredConversations = conversations.filter(conv => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
@@ -86,6 +113,36 @@ export default function ChatBox({ onClose, initialConversationId }: ChatBoxProps
       conv.listing?.title?.toLowerCase().includes(query)
     )
   })
+
+  const startConversationWithUser = async (userId: number) => {
+    try {
+      const response = await fetch('/api/messages/conversations/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          otherUserId: userId,
+          listingId: null
+        })
+      })
+      const data = await response.json()
+      if (data.conversation) {
+        await fetchConversations()
+        // Find and select the conversation
+        setTimeout(() => {
+          const conv = conversations.find(c => c.id === data.conversation.id)
+          if (conv) {
+            setSelectedConversation(conv)
+          } else {
+            // If conversation not found in list, create a temporary one
+            setSelectedConversation(data.conversation as any)
+          }
+          setSearchQuery('') // Clear search
+        }, 100)
+      }
+    } catch (error) {
+      console.error('Failed to create conversation:', error)
+    }
+  }
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -195,18 +252,26 @@ export default function ChatBox({ onClose, initialConversationId }: ChatBoxProps
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
           </div>
-        ) : filteredConversations.length === 0 ? (
+        ) : filteredConversations.length === 0 && searchedUsers.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6">
             <svg className="w-16 h-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             <p className="text-center">
-              {searchQuery ? 'Không tìm thấy cuộc trò chuyện' : 'Chưa có cuộc trò chuyện nào'}
+              {searchQuery ? 'Không tìm thấy cuộc trò chuyện hoặc người dùng' : 'Chưa có cuộc trò chuyện nào'}
             </p>
           </div>
         ) : (
           <div>
-            {filteredConversations.map((conv) => (
+            {/* Existing Conversations */}
+            {filteredConversations.length > 0 && (
+              <>
+                {searchQuery && (
+                  <div className="px-4 py-2 bg-gray-100 text-xs font-semibold text-gray-600">
+                    Cuộc trò chuyện
+                  </div>
+                )}
+                {filteredConversations.map((conv) => (
               <button
                 key={conv.id}
                 onClick={() => setSelectedConversation(conv)}
@@ -285,6 +350,71 @@ export default function ChatBox({ onClose, initialConversationId }: ChatBoxProps
                 </div>
               </button>
             ))}
+              </>
+            )}
+
+            {/* Searched Users */}
+            {searchedUsers.length > 0 && (
+              <>
+                <div className="px-4 py-2 bg-gray-100 text-xs font-semibold text-gray-600 border-t">
+                  Người dùng
+                </div>
+                {searchedUsers.map((user) => (
+                  <button
+                    key={`user-${user.id}`}
+                    onClick={() => startConversationWithUser(user.id)}
+                    className="w-full p-4 flex gap-3 hover:bg-gray-50 transition-colors border-b"
+                  >
+                    {/* Avatar */}
+                    <div className="flex-shrink-0">
+                      {user.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={user.name || user.email}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {(user.name || user.email).charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold text-sm truncate text-gray-900">
+                          {user.name || user.username || user.email}
+                        </h3>
+                      </div>
+                      {user.name && user.email && (
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      )}
+                      {user.role === 'ADMIN' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Chat Icon */}
+                    <div className="flex-shrink-0 flex items-center">
+                      <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Loading indicator for user search */}
+            {searchingUsers && (
+              <div className="p-4 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
+                <span className="ml-2 text-sm text-gray-500">Đang tìm kiếm...</span>
+              </div>
+            )}
           </div>
         )}
       </div>

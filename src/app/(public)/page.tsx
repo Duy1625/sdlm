@@ -50,6 +50,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     price: Number(listing.price)
   }))
 
+  // Search users if there's a query
+  let users: any[] = []
+  if (q && q.trim().length >= 2) {
+    users = await db.user.findMany({
+      where: {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } },
+          { username: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        avatar: true,
+        role: true,
+      },
+      take: 5, // Limit to 5 user results
+    })
+  }
+
   // Fetch parent categories for filter
   const categories = await db.category.findMany({
     where: {
@@ -103,11 +126,62 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       </span>
                     </h2>
                     <p className="text-gray-600 text-sm">
-                      {listings.length} tin đăng được tìm thấy
+                      {listings.length} tin đăng{users.length > 0 ? ` và ${users.length} người dùng` : ''} được tìm thấy
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* User Search Results */}
+              {users.length > 0 && (
+                <div className="mb-8 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-md">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b">
+                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                      Người dùng
+                    </h3>
+                  </div>
+                  <div className="divide-y">
+                    {users.map((user) => (
+                      <Link
+                        key={user.id}
+                        href={`/messages?userId=${user.id}`}
+                        className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name || user.email}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {(user.name || user.email).charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 truncate">
+                            {user.name || user.username || user.email}
+                          </h4>
+                          {user.name && user.email && (
+                            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                          )}
+                          {user.role === 'ADMIN' && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {listings.length === 0 ? (
                 <div className="text-center py-20">
