@@ -77,13 +77,14 @@ export default async function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-emerald-100/50 shadow-lg shadow-emerald-100/50">
       {/* Top Bar */}
-      <div className="container">
-        <div className="flex items-center gap-4 h-20">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="flex items-center gap-2 sm:gap-4 h-16 sm:h-20">
           <Link href="/" className="group flex items-center gap-2 flex-shrink-0">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-primary blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative px-4 py-2 bg-gradient-primary rounded-xl text-white font-bold text-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                Sadec Local Market
+              <div className="relative px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-primary rounded-lg sm:rounded-xl text-white font-bold text-sm sm:text-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                <span className="hidden sm:inline">Sadec Local Market</span>
+                <span className="sm:hidden">SDLM</span>
               </div>
             </div>
           </Link>
@@ -92,10 +93,10 @@ export default async function Header() {
             <HeaderSearchBar />
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             <Link
               href="/listings/new"
-              className="hidden md:inline-flex items-center gap-2 px-4 py-2 text-gray-700 font-medium hover:text-emerald-600 transition-all duration-300"
+              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 text-gray-700 font-medium hover:text-emerald-600 transition-all duration-300"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -109,13 +110,13 @@ export default async function Header() {
               <>
                 <Link
                   href="/register"
-                  className="px-6 py-2 border-2 border-emerald-500 text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all"
+                  className="hidden sm:inline-block px-3 sm:px-6 py-1.5 sm:py-2 border-2 border-emerald-500 text-emerald-600 font-semibold rounded-lg sm:rounded-xl hover:bg-emerald-50 transition-all text-sm"
                 >
                   Đăng ký
                 </Link>
                 <Link
                   href="/login"
-                  className="px-6 py-2 bg-gradient-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  className="px-3 sm:px-6 py-1.5 sm:py-2 bg-gradient-primary text-white font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transition-all text-sm"
                 >
                   Đăng nhập
                 </Link>
@@ -127,15 +128,15 @@ export default async function Header() {
 
       {/* Navigation Bar */}
       <div className="bg-gradient-to-r from-emerald-600 to-teal-600 border-t border-emerald-700/30">
-        <div className="container">
-          <nav className="flex items-center justify-center gap-1 overflow-x-auto py-3 scrollbar-hide">
+        <div className="container mx-auto px-0">
+          <nav className="flex items-center justify-start gap-1 overflow-x-auto py-2 sm:py-3 scrollbar-hide px-3 sm:px-4">
             {categories.map((category) => (
               <Link
                 key={category.name}
                 href={category.href}
-                className="flex items-center gap-2 px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 whitespace-nowrap text-sm font-medium"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 whitespace-nowrap text-xs sm:text-sm font-medium flex-shrink-0"
               >
-                {category.icon}
+                <span className="w-4 h-4 sm:w-5 sm:h-5">{category.icon}</span>
                 <span>{category.name}</span>
               </Link>
             ))}
