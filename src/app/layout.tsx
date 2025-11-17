@@ -1,10 +1,18 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Providers from '@/components/Providers'
 import PageViewTracker from '@/components/PageViewTracker'
 
 const inter = Inter({ subsets: ['latin', 'vietnamese'] })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#10b981',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://sdlm.vercel.app'),
