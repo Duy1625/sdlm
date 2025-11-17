@@ -94,14 +94,16 @@ export default async function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            {/* Đăng tin button - responsive */}
             <Link
               href="/listings/new"
-              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 text-gray-700 font-medium hover:text-emerald-600 transition-all duration-300"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-emerald-100 text-emerald-700 font-medium hover:bg-emerald-200 rounded-lg transition-all text-xs sm:text-sm"
+              title="Đăng tin"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Đăng tin
+              <span className="hidden xs:inline sm:inline">Đăng tin</span>
             </Link>
 
             {session ? (
