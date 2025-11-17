@@ -95,8 +95,31 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     },
   })
 
+  // Structured data for SEO
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Sadec Local Market',
+    alternateName: 'SDLM',
+    url: 'https://sdlm.vercel.app',
+    description: 'Chợ rao vặt trực tuyến Sà Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: 'https://sdlm.vercel.app/?q={search_term_string}'
+      },
+      'query-input': 'required name=search_term_string'
+    }
+  }
+
   return (
     <div>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Listings Grid */}
       <section id="listings" className="py-12 lg:py-16">
         <div className="flex flex-col lg:flex-row gap-6">
