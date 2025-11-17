@@ -17,11 +17,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://sdlm.vercel.app'),
   title: {
-    default: 'Sadec Local Market - Chợ Rao Vặt Sà Đéc | SDLM',
+    default: 'Sadec Local Market - Chợ Rao Vặt Sa Đéc | SDLM',
     template: '%s | Sadec Local Market'
   },
-  description: 'Chợ rao vặt trực tuyến Sà Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương. Đăng tin miễn phí, tìm kiếm dễ dàng, kết nối nhanh chóng.',
-  keywords: ['chợ rao vặt sà đéc', 'mua bán sà đéc', 'sadec local market', 'sdlm', 'đăng tin miễn phí', 'chợ online đồng tháp', 'rao vặt địa phương', 'mua bán đồng tháp'],
+  description: 'Chợ rao vặt trực tuyến Sa Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương. Đăng tin miễn phí, tìm kiếm dễ dàng, kết nối nhanh chóng.',
+  keywords: ['chợ rao vặt sa đéc', 'mua bán sa đéc', 'sadec local market', 'sdlm', 'đăng tin miễn phí', 'chợ online đồng tháp', 'rao vặt địa phương', 'mua bán đồng tháp'],
   authors: [{ name: 'Sadec Local Market' }],
   creator: 'Sadec Local Market',
   publisher: 'Sadec Local Market',
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     locale: 'vi_VN',
     url: 'https://sdlm.vercel.app',
     siteName: 'Sadec Local Market',
-    title: 'Sadec Local Market - Chợ Rao Vặt Sà Đéc',
-    description: 'Chợ rao vặt trực tuyến Sà Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
+    title: 'Sadec Local Market - Chợ Rao Vặt Sa Đéc',
+    description: 'Chợ rao vặt trực tuyến Sa Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
     images: [
       {
         url: '/og-image.jpg',
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sadec Local Market - Chợ Rao Vặt Sà Đéc',
-    description: 'Chợ rao vặt trực tuyến Sà Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
+    title: 'Sadec Local Market - Chợ Rao Vặt Sa Đéc',
+    description: 'Chợ rao vặt trực tuyến Sa Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
     images: ['/og-image.jpg'],
   },
   robots: {

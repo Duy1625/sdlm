@@ -102,7 +102,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     name: 'Sadec Local Market',
     alternateName: 'SDLM',
     url: 'https://sdlm.vercel.app',
-    description: 'Chợ rao vặt trực tuyến Sà Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
+    description: 'Chợ rao vặt trực tuyến Sa Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -140,7 +140,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   Nhưng vấn đề lớn nhất của trang web lúc này là thiếu lượt truy cập. Là một trang web mới tạo do đó không ai biết đến web mình hết, do đó web rất cần sự ủng hộ của các bạn. Nếu dùng tốt, hãy chia sẻ với những người khác giúp mình, cảm ơn các bạn.
                 </p>
                 <p>
-                  Web mình tạo với mục đích ban đầu là mong cải thiện phần nào việc mua bán tại địa phương (năm nay ế wá ế, đã vậy còn bị nước ngập, te tua xơ mướp hết '_'). Các bạn ở địa phương khác ko fải Sađéc vẫn có thể đăng bài bình thường nhe, chỉ cần có ship thì vẫn ok thôi.
+                  Web mình tạo với mục đích ban đầu là mong cải thiện phần nào việc mua bán tại địa phương (năm nay ế wá ế, đã vậy còn bị nước ngập, te tua xơ mướp hết '_'). Các bạn ở địa phương khác ko phải Sa Đéc vẫn có thể đăng bài bình thường nhe, chỉ cần có ship thì vẫn ok thôi.
                 </p>
                 <p>
                   Việc đăng bài trên trang web hoàn toàn miễn phí, bạn có thể đăng ký hoặc ko đăng ký đều có thể đăng bài dc. Nếu bạn sử dụng web thường xuyên bạn nên đăng ký hoặc đăng nhập facebook/google để quản lý, chỉnh sửa tin đăng. Việc đăng ký cũng rất nhanh chóng (máy nó bớt ngoo nên chỉ đký 1 lần chứ ko fải làm tới làm lui đâu).
