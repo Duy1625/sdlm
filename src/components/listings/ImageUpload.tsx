@@ -25,6 +25,58 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
   const imageCount = mediaFiles.filter(m => m.type === 'image').length
   const videoCount = mediaFiles.filter(m => m.type === 'video').length
 
+  // Compress image if needed
+  const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
+
+          // Calculate new dimensions to keep file under 4MB
+          const maxDimension = 2048 // Max width/height
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = (height / width) * maxDimension
+              width = maxDimension
+            } else {
+              width = (width / height) * maxDimension
+              height = maxDimension
+            }
+          }
+
+          canvas.width = width
+          canvas.height = height
+
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+
+          // Convert to blob with quality adjustment
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name, {
+                  type: 'image/jpeg',
+                  lastModified: Date.now(),
+                })
+                resolve(compressedFile)
+              } else {
+                resolve(file)
+              }
+            },
+            'image/jpeg',
+            0.85 // 85% quality
+          )
+        }
+        img.src = e.target?.result as string
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
@@ -33,7 +85,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
     const newMediaFiles: MediaFile[] = []
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i]
+      let file = files[i]
       const fileType = file.type.split('/')[0] as 'image' | 'video'
 
       // Check limits
@@ -51,10 +103,16 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
       }
 
       // Check file size
-      const maxSize = fileType === 'image' ? 10 * 1024 * 1024 : 100 * 1024 * 1024
+      const maxSize = fileType === 'image' ? 50 * 1024 * 1024 : 100 * 1024 * 1024
       if (file.size > maxSize) {
-        alert(`File "${file.name}" quá lớn. Tối đa ${fileType === 'image' ? '10MB' : '100MB'}`)
+        alert(`File "${file.name}" quá lớn. Tối đa ${fileType === 'image' ? '50MB' : '100MB'}`)
         continue
+      }
+
+      // Compress image if it's too large (> 4MB for Vercel limit)
+      if (fileType === 'image' && file.size > 4 * 1024 * 1024) {
+        setUploadProgress(`Đang nén ${file.name}...`)
+        file = await compressImage(file)
       }
 
       setUploadProgress(`Đang tải lên ${file.name}...`)
@@ -248,9 +306,10 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
         <p className="font-semibold mb-2">📌 Hướng dẫn:</p>
         <ul className="list-disc list-inside space-y-1">
           <li>File đầu tiên sẽ là ảnh/video chính hiển thị trên thẻ tin đăng</li>
-          <li>Tối đa: <strong>6 hình ảnh</strong> (mỗi ảnh tối đa 10MB)</li>
+          <li>Tối đa: <strong>6 hình ảnh</strong> (ảnh lớn sẽ tự động nén)</li>
           <li>Tối đa: <strong>2 video</strong> (mỗi video tối đa 100MB)</li>
           <li>Hỗ trợ: JPG, PNG, GIF, MP4, MOV, AVI</li>
+          <li>✨ Ảnh lớn hơn 4MB sẽ được tự động nén để tải nhanh hơn</li>
         </ul>
       </div>
     </div>
