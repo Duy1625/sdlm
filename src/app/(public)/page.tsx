@@ -53,13 +53,25 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // Search users if there's a query
   let users: any[] = []
   if (q && q.trim().length >= 2) {
+    const searchConditions: any[] = [
+      { name: { contains: q, mode: 'insensitive' } },
+      { email: { contains: q, mode: 'insensitive' } },
+    ]
+
+    // Only search username if it's not null
+    if (q) {
+      searchConditions.push({
+        username: {
+          not: null,
+          contains: q,
+          mode: 'insensitive'
+        }
+      })
+    }
+
     users = await db.user.findMany({
       where: {
-        OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { email: { contains: q, mode: 'insensitive' } },
-          { username: { contains: q, mode: 'insensitive' } },
-        ],
+        OR: searchConditions,
       },
       select: {
         id: true,
