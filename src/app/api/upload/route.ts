@@ -8,7 +8,15 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: 'Không có file được upload' },
+        { success: false, error: 'Không có file được upload' },
+        { status: 400 }
+      )
+    }
+
+    // Validate file name and size
+    if (!file.name || file.size === 0) {
+      return NextResponse.json(
+        { success: false, error: 'File không hợp lệ hoặc rỗng' },
         { status: 400 }
       )
     }
@@ -17,7 +25,7 @@ export async function POST(request: NextRequest) {
     const fileType = file.type.split('/')[0]
     if (fileType !== 'image' && fileType !== 'video') {
       return NextResponse.json(
-        { error: 'Chỉ hỗ trợ file ảnh hoặc video' },
+        { success: false, error: 'Chỉ hỗ trợ file ảnh hoặc video' },
         { status: 400 }
       )
     }
@@ -26,7 +34,7 @@ export async function POST(request: NextRequest) {
     const maxSize = fileType === 'image' ? 10 * 1024 * 1024 : 100 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: `File ${fileType === 'image' ? 'ảnh' : 'video'} quá lớn. Tối đa ${fileType === 'image' ? '10MB' : '100MB'}` },
+        { success: false, error: `File ${fileType === 'image' ? 'ảnh' : 'video'} quá lớn. Tối đa ${fileType === 'image' ? '10MB' : '100MB'}` },
         { status: 400 }
       )
     }
@@ -55,13 +63,14 @@ export async function POST(request: NextRequest) {
       success: true,
       url: result.secure_url,
       type: fileType,
-      filename: result.public_id
+      publicId: result.public_id
     })
 
   } catch (error) {
     console.error('Upload error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Lỗi khi upload file'
     return NextResponse.json(
-      { error: 'Lỗi khi upload file' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }

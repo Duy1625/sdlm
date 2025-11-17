@@ -68,6 +68,19 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
           body: formData,
         })
 
+        // Check if response is OK before parsing
+        if (!response.ok) {
+          let errorMessage = 'Lỗi server'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+          } catch {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          }
+          alert(`Lỗi tải lên ${file.name}: ${errorMessage}`)
+          continue
+        }
+
         const data = await response.json()
 
         if (data.success) {
@@ -77,11 +90,12 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
             publicId: data.publicId,
           })
         } else {
-          alert(`Lỗi tải lên ${file.name}: ${data.error}`)
+          alert(`Lỗi tải lên ${file.name}: ${data.error || 'Không rõ nguyên nhân'}`)
         }
       } catch (error) {
         console.error('Upload error:', error)
-        alert(`Lỗi khi tải lên ${file.name}`)
+        const errorMsg = error instanceof Error ? error.message : 'Không rõ nguyên nhân'
+        alert(`Lỗi khi tải lên ${file.name}: ${errorMsg}`)
       }
     }
 
