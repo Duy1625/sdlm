@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import ChatButton from '@/components/messages/ChatButton'
 import ImageGallery from '@/components/listings/ImageGallery'
+import CommentSection from '@/components/comments/CommentSection'
 
 interface ListingPageProps {
   params: {
@@ -124,6 +125,9 @@ export default async function ListingPage({ params }: ListingPageProps) {
                   </div>
                 </div>
               </div>
+
+              {/* Comments Section */}
+              <CommentSection listingId={listing.id} />
             </div>
 
             {/* Sidebar */}

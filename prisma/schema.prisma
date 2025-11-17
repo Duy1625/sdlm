@@ -30,6 +30,7 @@ model User {
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
   pageViews        PageView[]
+  comments         Comment[]
 
   @@unique([provider, providerId])
   @@index([role])
@@ -90,6 +91,7 @@ model Listing {
   user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   images      Image[]
   conversations Conversation[]
+  comments    Comment[]
 
   @@index([categoryId])
   @@index([userId])
@@ -112,6 +114,29 @@ model Image {
   @@index([listingId])
   @@index([isPrimary])
   @@map("images")
+}
+
+model Comment {
+  id          Int      @id @default(autoincrement())
+  content     String   @db.Text
+  listingId   Int
+
+  // User info (either logged-in user or guest)
+  userId      Int?
+  guestName   String?  @db.VarChar(100)
+  guestEmail  String?  @db.VarChar(100)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("comments")
 }
 
 model Conversation {
