@@ -160,9 +160,13 @@ export default async function ListingPage({ params }: ListingPageProps) {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800">{listing.contactName}</p>
-                      {listing.user && (
+                      {listing.user ? (
                         <p className="text-sm text-gray-600">
-                          {listing.user.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên'}
+                          Thành viên
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          Khách
                         </p>
                       )}
                     </div>
