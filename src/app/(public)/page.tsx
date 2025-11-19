@@ -27,16 +27,38 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   if (category) {
-    where.category = {
-      slug: category,
-    }
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: [
+          // Match the category itself
+          {
+            category: {
+              slug: category,
+            },
+          },
+          // Match child categories whose parent has this slug
+          {
+            category: {
+              parent: {
+                slug: category,
+              },
+            },
+          },
+        ],
+      },
+    ]
   }
 
   // Fetch listings
   const listingsRaw = await db.listing.findMany({
     where,
     include: {
-      category: true,
+      category: {
+        include: {
+          parent: true,
+        },
+      },
       images: true,
     },
     orderBy: {
