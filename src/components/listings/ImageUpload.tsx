@@ -11,15 +11,22 @@ interface MediaFile {
 interface ImageUploadProps {
   images: string[]
   onChange: (images: string[]) => void
+  onUploadingChange?: (uploading: boolean) => void
 }
 
-export default function ImageUpload({ images, onChange }: ImageUploadProps) {
+export default function ImageUpload({ images, onChange, onUploadingChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string>('')
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(
     images.map(url => ({ url, type: 'image' as const }))
   )
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Notify parent component when uploading state changes
+  const setUploadingState = (state: boolean) => {
+    setUploading(state)
+    onUploadingChange?.(state)
+  }
 
   // Count images and videos
   const imageCount = mediaFiles.filter(m => m.type === 'image').length
@@ -81,7 +88,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
-    setUploading(true)
+    setUploadingState(true)
     const newMediaFiles: MediaFile[] = []
 
     for (let i = 0; i < files.length; i++) {
@@ -161,7 +168,7 @@ export default function ImageUpload({ images, onChange }: ImageUploadProps) {
     setMediaFiles(updatedMedia)
     onChange(updatedMedia.map(m => m.url))
 
-    setUploading(false)
+    setUploadingState(false)
     setUploadProgress('')
 
     // Reset input

@@ -35,6 +35,7 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
   const [images, setImages] = useState<string[]>(
     listing?.images.map(img => img.url) || []
   )
+  const [isUploadingImages, setIsUploadingImages] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -336,7 +337,11 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
         <h2 className="text-xl font-bold text-gray-800">
           Hình ảnh
         </h2>
-        <ImageUpload images={images} onChange={setImages} />
+        <ImageUpload
+          images={images}
+          onChange={setImages}
+          onUploadingChange={setIsUploadingImages}
+        />
       </div>
 
       {/* Contact Info */}
@@ -397,10 +402,16 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
       <div className="flex gap-4">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || isUploadingImages}
           className="flex-1 py-4 bg-gradient-primary text-white font-semibold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? 'Đang xử lý...' : listing ? 'Cập nhật tin' : 'Đăng tin'}
+          {isUploadingImages
+            ? '⏳ Đang tải hình ảnh...'
+            : isPending
+            ? 'Đang xử lý...'
+            : listing
+            ? 'Cập nhật tin'
+            : 'Đăng tin'}
         </button>
 
         <button
