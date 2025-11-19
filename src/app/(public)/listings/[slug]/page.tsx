@@ -21,10 +21,26 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound()
   }
 
-  const formattedPrice = new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND'
-  }).format(Number(listing.price))
+  // Format price or price range
+  let priceDisplay = ''
+  if (listing.priceMin && listing.priceMax) {
+    // Display price range
+    const formattedMin = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.priceMin))
+    const formattedMax = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.priceMax))
+    priceDisplay = `${formattedMin} - ${formattedMax}`
+  } else {
+    // Display single price
+    priceDisplay = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.price))
+  }
 
   const isOwner = session?.user?.id && listing.userId === parseInt(session.user.id)
   const isAdmin = session?.user?.role === 'ADMIN'
@@ -88,7 +104,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 {/* Price */}
                 <div className="mb-6">
                   <span className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    {formattedPrice}
+                    {priceDisplay}
                   </span>
                 </div>
 

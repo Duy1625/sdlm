@@ -21,9 +21,9 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
     title: listing?.title || '',
     description: listing?.description || '',
     price: listing?.price?.toString() || '',
-    priceType: 'fixed' as 'fixed' | 'range',
-    minPrice: '',
-    maxPrice: '',
+    priceType: (listing?.priceMin && listing?.priceMax ? 'range' : 'fixed') as 'fixed' | 'range',
+    minPrice: listing?.priceMin?.toString() || '',
+    maxPrice: listing?.priceMax?.toString() || '',
     categoryId: listing?.categoryId?.toString() || '',
     location: listing?.location || '',
     contactName: listing?.contactName || session?.user?.name || '',
@@ -80,8 +80,11 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
       return
     }
 
-    // Calculate final price based on price type
+    // Calculate final price and price range based on price type
     let finalPrice = '0'
+    let priceMin = ''
+    let priceMax = ''
+
     if (formData.priceType === 'fixed' && formData.price) {
       finalPrice = formData.price
     } else if (formData.priceType === 'range') {
@@ -95,7 +98,10 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
           return
         }
 
-        // Store as average for database
+        // Store min and max separately
+        priceMin = formData.minPrice
+        priceMax = formData.maxPrice
+        // Store average as main price for sorting/filtering
         const avg = (min + max) / 2
         finalPrice = avg.toString()
       }
@@ -105,6 +111,8 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
     data.append('title', formData.title)
     data.append('description', formData.description)
     data.append('price', finalPrice)
+    if (priceMin) data.append('priceMin', priceMin)
+    if (priceMax) data.append('priceMax', priceMax)
     data.append('categoryId', formData.categoryId)
     data.append('location', formData.location)
     data.append('contactName', formData.contactName)

@@ -2,8 +2,10 @@ import Link from 'next/link'
 import type { Listing, Category, Image } from '@prisma/client'
 import { formatRelativeTime } from '@/lib/formatTime'
 
-type ListingWithRelations = Omit<Listing, 'price'> & {
+type ListingWithRelations = Omit<Listing, 'price' | 'priceMin' | 'priceMax'> & {
   price: number
+  priceMin: number | null
+  priceMax: number | null
   category: Category
   images: Image[]
 }
@@ -14,10 +16,25 @@ interface ListingListCardProps {
 
 export default function ListingListCard({ listing }: ListingListCardProps) {
   const primaryImage = listing.images.find(img => img.isPrimary) || listing.images[0]
-  const formattedPrice = new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND'
-  }).format(Number(listing.price))
+
+  // Format price or price range
+  let priceDisplay = ''
+  if (listing.priceMin && listing.priceMax) {
+    const formattedMin = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.priceMin))
+    const formattedMax = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.priceMax))
+    priceDisplay = `${formattedMin} - ${formattedMax}`
+  } else {
+    priceDisplay = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(Number(listing.price))
+  }
 
   return (
     <Link href={`/listings/${listing.slug}`}>
@@ -49,9 +66,9 @@ export default function ListingListCard({ listing }: ListingListCardProps) {
 
             {/* Price */}
             <div className="mb-2">
-              {listing.price > 0 ? (
+              {listing.price > 0 || (listing.priceMin && listing.priceMax) ? (
                 <span className="text-xl font-bold text-emerald-600">
-                  {formattedPrice}
+                  {priceDisplay}
                 </span>
               ) : (
                 <span className="text-lg font-semibold text-emerald-600">

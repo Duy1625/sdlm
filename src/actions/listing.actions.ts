@@ -27,6 +27,10 @@ export async function createListing(formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string
     const price = parseFloat(formData.get('price') as string)
+    const priceMinStr = formData.get('priceMin') as string
+    const priceMaxStr = formData.get('priceMax') as string
+    const priceMin = priceMinStr ? parseFloat(priceMinStr) : null
+    const priceMax = priceMaxStr ? parseFloat(priceMaxStr) : null
     const categoryId = parseInt(formData.get('categoryId') as string)
     const location = formData.get('location') as string
     const contactName = formData.get('contactName') as string
@@ -51,6 +55,8 @@ export async function createListing(formData: FormData) {
         slug,
         description,
         price,
+        priceMin,
+        priceMax,
         categoryId,
         location: location || null,
         contactName,
@@ -74,7 +80,9 @@ export async function createListing(formData: FormData) {
     // Convert Decimal to number for serialization
     const listing = {
       ...listingRaw,
-      price: Number(listingRaw.price)
+      price: Number(listingRaw.price),
+      priceMin: listingRaw.priceMin ? Number(listingRaw.priceMin) : null,
+      priceMax: listingRaw.priceMax ? Number(listingRaw.priceMax) : null,
     }
 
     revalidatePath('/')
@@ -111,6 +119,10 @@ export async function updateListing(listingId: number, formData: FormData) {
     const title = formData.get('title') as string
     const description = formData.get('description') as string
     const price = parseFloat(formData.get('price') as string)
+    const priceMinStr = formData.get('priceMin') as string
+    const priceMaxStr = formData.get('priceMax') as string
+    const priceMin = priceMinStr ? parseFloat(priceMinStr) : null
+    const priceMax = priceMaxStr ? parseFloat(priceMaxStr) : null
     const categoryId = parseInt(formData.get('categoryId') as string)
     const location = formData.get('location') as string
     const contactName = formData.get('contactName') as string
@@ -132,6 +144,8 @@ export async function updateListing(listingId: number, formData: FormData) {
         title,
         description,
         price,
+        priceMin,
+        priceMax,
         categoryId,
         location: location || null,
         contactName,
@@ -153,7 +167,9 @@ export async function updateListing(listingId: number, formData: FormData) {
     // Convert Decimal to number for serialization
     const listing = {
       ...listingRaw,
-      price: Number(listingRaw.price)
+      price: Number(listingRaw.price),
+      priceMin: listingRaw.priceMin ? Number(listingRaw.priceMin) : null,
+      priceMax: listingRaw.priceMax ? Number(listingRaw.priceMax) : null,
     }
 
     revalidatePath('/')
@@ -227,7 +243,9 @@ export async function getListingBySlug(slug: string) {
     // Convert Decimal to number for serialization
     return {
       ...listing,
-      price: Number(listing.price)
+      price: Number(listing.price),
+      priceMin: listing.priceMin ? Number(listing.priceMin) : null,
+      priceMax: listing.priceMax ? Number(listing.priceMax) : null,
     }
   } catch (error) {
     console.error('Get listing error:', error)
@@ -263,7 +281,9 @@ export async function getUserListings() {
     // Convert Decimal to number for serialization
     return listingsRaw.map(listing => ({
       ...listing,
-      price: Number(listing.price)
+      price: Number(listing.price),
+      priceMin: listing.priceMin ? Number(listing.priceMin) : null,
+      priceMax: listing.priceMax ? Number(listing.priceMax) : null,
     }))
   } catch (error) {
     console.error('Get user listings error:', error)
@@ -335,7 +355,9 @@ export async function getAllListingsForAdmin() {
     // Convert Decimal to number for serialization
     return listingsRaw.map(listing => ({
       ...listing,
-      price: Number(listing.price)
+      price: Number(listing.price),
+      priceMin: listing.priceMin ? Number(listing.priceMin) : null,
+      priceMax: listing.priceMax ? Number(listing.priceMax) : null,
     }))
   } catch (error) {
     console.error('Get all listings for admin error:', error)
