@@ -21,8 +21,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   if (q) {
     where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
+      { title: { contains: q, mode: 'insensitive' } },
+      { description: { contains: q, mode: 'insensitive' } },
+      { location: { contains: q, mode: 'insensitive' } },
+      { contactName: { contains: q, mode: 'insensitive' } },
     ]
   }
 
