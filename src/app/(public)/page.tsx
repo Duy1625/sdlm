@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import ListingListCard from '@/components/listings/ListingListCard'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +10,54 @@ interface HomePageProps {
     q?: string
     category?: string
   }>
+}
+
+// Generate dynamic metadata based on search params
+export async function generateMetadata({ searchParams }: HomePageProps): Promise<Metadata> {
+  const { q, category } = await searchParams
+
+  if (q) {
+    return {
+      title: `Tìm kiếm: ${q}`,
+      description: `Kết quả tìm kiếm cho "${q}" trên Sadec Local Market - Chợ rao vặt Sa Đéc. Mua bán hàng hóa và dịch vụ địa phương.`,
+      openGraph: {
+        title: `Tìm kiếm: ${q} | Sadec Local Market`,
+        description: `Kết quả tìm kiếm cho "${q}" trên chợ rao vặt Sa Đéc`,
+      },
+    }
+  }
+
+  if (category) {
+    const categoryData = await db.category.findUnique({
+      where: { slug: category },
+      include: {
+        children: true,
+      },
+    })
+
+    if (categoryData) {
+      const childCategories = categoryData.children.map(c => c.name).join(', ')
+      return {
+        title: `${categoryData.name} - Mua bán ${categoryData.name} tại Sa Đéc`,
+        description: `Tìm kiếm và mua bán ${categoryData.name} tại Sa Đéc, Đồng Tháp. ${childCategories ? `Bao gồm: ${childCategories}.` : ''} Đăng tin miễn phí, giao dịch nhanh chóng.`,
+        keywords: [
+          categoryData.name,
+          `mua bán ${categoryData.name.toLowerCase()}`,
+          `${categoryData.name.toLowerCase()} sa đéc`,
+          `${categoryData.name.toLowerCase()} đồng tháp`,
+          'chợ rao vặt',
+          ...categoryData.children.map(c => c.name),
+        ],
+        openGraph: {
+          title: `${categoryData.name} | Sadec Local Market`,
+          description: `Mua bán ${categoryData.name} tại Sa Đéc, Đồng Tháp. Đăng tin miễn phí.`,
+        },
+      }
+    }
+  }
+
+  // Default home page metadata (will use the root layout metadata)
+  return {}
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {

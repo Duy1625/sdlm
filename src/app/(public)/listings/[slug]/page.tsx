@@ -6,10 +6,69 @@ import { authOptions } from '@/lib/auth'
 import ChatButton from '@/components/messages/ChatButton'
 import ImageGallery from '@/components/listings/ImageGallery'
 import CommentSection from '@/components/comments/CommentSection'
+import type { Metadata } from 'next'
 
 interface ListingPageProps {
   params: {
     slug: string
+  }
+}
+
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
+  const listing = await getListingBySlug(params.slug)
+
+  if (!listing) {
+    return {
+      title: 'Không tìm thấy tin đăng',
+    }
+  }
+
+  const price = Number(listing.price)
+  const priceText = new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(price)
+
+  const imageUrl = listing.images[0]?.url || '/og-image.jpg'
+  const description = listing.description.length > 160
+    ? listing.description.substring(0, 157) + '...'
+    : listing.description
+
+  return {
+    title: listing.title,
+    description: `${description} - Giá: ${priceText}. ${listing.category.name} tại ${listing.location || 'Sa Đéc'}`,
+    keywords: [
+      listing.title,
+      listing.category.name,
+      'mua bán ' + listing.category.name.toLowerCase(),
+      listing.location || 'sa đéc',
+      'chợ rao vặt',
+      'đồng tháp',
+      ...listing.title.split(' ').filter(word => word.length > 3)
+    ],
+    openGraph: {
+      type: 'website',
+      locale: 'vi_VN',
+      url: `https://sdlm.vercel.app/listings/${listing.slug}`,
+      siteName: 'Sadec Local Market',
+      title: listing.title,
+      description: `${description} - Giá: ${priceText}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: listing.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: listing.title,
+      description: `${description} - Giá: ${priceText}`,
+      images: [imageUrl],
+    },
   }
 }
 
@@ -45,8 +104,80 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const isOwner = session?.user?.id && listing.userId === parseInt(session.user.id)
   const isAdmin = session?.user?.role === 'ADMIN'
 
+  // Product Schema for SEO
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.title,
+    description: listing.description,
+    image: listing.images.map(img => img.url),
+    offers: {
+      '@type': 'Offer',
+      price: Number(listing.price),
+      priceCurrency: 'VND',
+      availability: listing.status === 'ACTIVE'
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Person',
+        name: listing.contactName,
+        telephone: listing.contactPhone,
+      },
+      itemCondition: 'https://schema.org/UsedCondition', // hoặc NewCondition tùy vào sản phẩm
+    },
+    category: listing.category.name,
+    ...(listing.location && {
+      offers: {
+        ...productSchema?.offers,
+        availableAtOrFrom: {
+          '@type': 'Place',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: listing.location,
+            addressCountry: 'VN',
+          },
+        },
+      },
+    }),
+  }
+
+  // BreadcrumbList Schema for SEO
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Trang chủ',
+        item: 'https://sdlm.vercel.app',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: listing.category.name,
+        item: `https://sdlm.vercel.app/?category=${listing.category.slug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: listing.title,
+        item: `https://sdlm.vercel.app/listings/${listing.slug}`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-12">
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="container">
         {/* Breadcrumb */}
         <div className="max-w-6xl mx-auto mb-6">
