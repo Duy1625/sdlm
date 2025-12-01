@@ -123,12 +123,8 @@ export default async function ListingPage({ params }: ListingPageProps) {
         name: listing.contactName,
         telephone: listing.contactPhone,
       },
-      itemCondition: 'https://schema.org/UsedCondition', // hoặc NewCondition tùy vào sản phẩm
-    },
-    category: listing.category.name,
-    ...(listing.location && {
-      offers: {
-        ...productSchema?.offers,
+      itemCondition: 'https://schema.org/UsedCondition',
+      ...(listing.location && {
         availableAtOrFrom: {
           '@type': 'Place',
           address: {
@@ -137,8 +133,9 @@ export default async function ListingPage({ params }: ListingPageProps) {
             addressCountry: 'VN',
           },
         },
-      },
-    }),
+      }),
+    },
+    category: listing.category.name,
   }
 
   // BreadcrumbList Schema for SEO
