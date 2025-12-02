@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth'
 import ChatButton from '@/components/messages/ChatButton'
 import ImageGallery from '@/components/listings/ImageGallery'
 import CommentSection from '@/components/comments/CommentSection'
+import { db } from '@/lib/db'
 import type { Metadata } from 'next'
 
 interface ListingPageProps {
@@ -13,6 +14,23 @@ interface ListingPageProps {
     slug: string
   }
 }
+
+// Generate static params for better SEO indexing
+export async function generateStaticParams() {
+  const listings = await db.listing.findMany({
+    where: { status: 'ACTIVE' },
+    select: { slug: true },
+    take: 100,
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return listings.map((listing) => ({
+    slug: listing.slug,
+  }))
+}
+
+// Revalidate every 1 hour for ISR
+export const revalidate = 3600
 
 // Generate dynamic metadata for SEO
 export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
@@ -35,25 +53,34 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
     ? listing.description.substring(0, 157) + '...'
     : listing.description
 
+  const location = listing.location || 'Sa Đéc'
+  
   return {
-    title: listing.title,
-    description: `${description} - Giá: ${priceText}. ${listing.category.name} tại ${listing.location || 'Sa Đéc'}`,
+    title: `${listing.title} - ${location}`,
+    description: `${description} - Giá: ${priceText}. ${listing.category.name} tại ${location}, Đồng Tháp. Mua bán uy tín trên SDLM.`,
     keywords: [
       listing.title,
+      listing.title + ' ' + location.toLowerCase(),
       listing.category.name,
-      'mua bán ' + listing.category.name.toLowerCase(),
-      listing.location || 'sa đéc',
-      'chợ rao vặt',
-      'đồng tháp',
+      listing.category.name + ' ' + location.toLowerCase(),
+      'mua bán ' + listing.category.name.toLowerCase() + ' ' + location.toLowerCase(),
+      location.toLowerCase(),
+      'sa đéc',
+      'đồng tháp', 
+      'chợ rao vặt ' + location.toLowerCase(),
+      'sdlm',
       ...listing.title.split(' ').filter(word => word.length > 3)
     ],
+    alternates: {
+      canonical: `https://sdlm.vercel.app/listings/${listing.slug}`,
+    },
     openGraph: {
-      type: 'website',
+      type: 'product',
       locale: 'vi_VN',
       url: `https://sdlm.vercel.app/listings/${listing.slug}`,
-      siteName: 'Sadec Local Market',
-      title: listing.title,
-      description: `${description} - Giá: ${priceText}`,
+      siteName: 'SDLM - Chợ Rao Vặt Sa Đéc',
+      title: `${listing.title} - ${location}`,
+      description: `${description} - Giá: ${priceText} tại ${location}`,
       images: [
         {
           url: imageUrl,

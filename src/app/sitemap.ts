@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
 import { db } from '@/lib/db'
 
+// Revalidate sitemap every hour
+export const revalidate = 3600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://sdlm.vercel.app'
 
@@ -9,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'hourly',
       priority: 1,
     },
     {
@@ -62,8 +65,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const listingPages: MetadataRoute.Sitemap = listings.map((listing) => ({
       url: `${baseUrl}/listings/${listing.slug}`,
       lastModified: listing.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
     }))
 
     // Get all categories
