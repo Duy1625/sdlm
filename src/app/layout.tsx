@@ -17,11 +17,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://sdlm.vercel.app'),
   title: {
-    default: 'Sadec Local Market - Chợ Rao Vặt Sa Đéc | SDLM',
-    template: '%s | Sadec Local Market'
+    default: 'SDLM - Chợ Rao Vặt Sa Đéc, Đồng Tháp | Mua Bán Online',
+    template: '%s | SDLM Sa Đéc'
   },
-  description: 'Chợ rao vặt trực tuyến Sa Đéc - Mua bán, trao đổi hàng hóa và dịch vụ địa phương. Đăng tin miễn phí, tìm kiếm dễ dàng, kết nối nhanh chóng.',
-  keywords: ['chợ rao vặt sa đéc', 'mua bán sa đéc', 'sadec local market', 'sdlm', 'đăng tin miễn phí', 'chợ online đồng tháp', 'rao vặt địa phương', 'mua bán đồng tháp'],
+  description: 'Chợ rao vặt trực tuyến Sa Đéc, Đồng Tháp - Mua bán iPhone, điện thoại, xe máy, đồ điện tử tại Sa Đéc. Đăng tin miễn phí, giao dịch nhanh chóng.',
+  keywords: ['chợ rao vặt sa đéc', 'mua bán sa đéc', 'sdlm', 'iphone sa đéc', 'điện thoại sa đéc', 'xe máy sa đéc', 'mua bán đồng tháp', 'rao vặt đồng tháp', 'đồ cũ sa đéc'],
   authors: [{ name: 'Sadec Local Market' }],
   creator: 'Sadec Local Market',
   publisher: 'Sadec Local Market',
