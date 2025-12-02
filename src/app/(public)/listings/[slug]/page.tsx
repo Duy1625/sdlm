@@ -29,6 +29,9 @@ export async function generateStaticParams() {
   }))
 }
 
+// Allow dynamic pages for new listings not in generateStaticParams
+export const dynamicParams = true
+
 // Revalidate every 1 hour for ISR
 export const revalidate = 3600
 
